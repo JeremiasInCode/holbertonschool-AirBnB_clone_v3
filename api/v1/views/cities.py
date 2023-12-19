@@ -84,7 +84,7 @@ def post_city(state_id):
         or if 'name' is missing.
     """
     if storage.get(State, state_id) is None:
-        abort(404)
+        abort(400)
 
     data = request.get_json()
 
