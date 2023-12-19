@@ -10,15 +10,18 @@ from models.user import User
 from models import storage
 from flask import jsonify, abort, request
 
-
-
-@app_views.route('/states/<state_id>', methods=['GET'], strict_slashes=False)
-@app_views.route('/states')
+@app_views.route('/states/<state_id>', methods=['GET'])
+@app_views.route('/states', defaults={'state_id': None}, methods=['GET'])
 def specific_state(state_id):
     """ Retrieve a specific state """
-    if storage.get(State, state_id) is None:
-        abort(404)
-    return jsonify(storage.get(State, state_id).to_dict())
+    if state_id is not None:
+        state = storage.get(State, state_id)
+        if state is None:
+            abort(404)
+        return jsonify(state.to_dict())
+    else:
+        states = storage.all(State).values()
+        return jsonify([state.to_dict() for state in states])
 
 
 @app_views.route('/states/<state_id>', methods=['DELETE'])
@@ -26,12 +29,12 @@ def delete_state(state_id):
     """ Delete a specific state_id """
     state = storage.get(State, state_id)
 
-    if state is None:
+    if state:
+        storage.delete(state)
+        storage.save()
+        return jsonify({}), 200
+    else:
         abort(404)
-
-    storage.delete(state)
-    storage.save()
-    return jsonify({}), 200
 
 
 @app_views.route('/states/', methods=['POST'])
@@ -52,7 +55,7 @@ def add_state():
 
 @app_views.route('/states/<state_id>', methods=['PUT'])
 def update_state(state_id):
-    """Update an state by given id"""
+    """Update a state by given id"""
     data = request.get_json()
 
     if data is None:
@@ -65,7 +68,7 @@ def update_state(state_id):
 
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
-            # updated attributes
+            # update attributes
             setattr(state, key, value)
     state.save()
     return jsonify(state.to_dict()), 200
