@@ -70,21 +70,10 @@ def delete_city(city_id):
 
 @app_views.route("states/<state_id>/cities", methods=["POST"])
 def post_city(state_id):
-    """Create a new city in the specified state.
+    """POST API route, creates a new city"""
 
-    Args:
-        state_id (str): The ID of the state to add the city to.
-
-    Returns:
-        JSON: A JSON representation of the newly created city.
-
-    Raises:
-        404: If the specified state is not found.
-        400: If the request does not contain valid JSON data
-        or if 'name' is missing.
-    """
     if storage.get(State, state_id) is None:
-        abort(400)
+        abort(404)
 
     data = request.get_json()
 
