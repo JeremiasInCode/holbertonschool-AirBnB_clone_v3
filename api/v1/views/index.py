@@ -17,7 +17,7 @@ def status():
     return jsonify({"status": "OK"})
 
 
-@app_views.route("/api/v1/stats", methods=['GET'], strict_slashes=False)
+@app_views.route("/stats", methods=['GET'], strict_slashes=False)
 def counter():
     """ Retrieves the number of wach objects by type """
     clasess = [Amenity, City, Place, Review, State, User]
