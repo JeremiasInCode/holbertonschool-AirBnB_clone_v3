@@ -12,13 +12,13 @@ from flask import jsonify
 
 
 @app_views.route("/status", methods=['GET'], strict_slashes=False)
-def status():
+def status_api():
     """ Status of API """
     return jsonify({"status": "OK"})
 
 
 @app_views.route("/stats", methods=['GET'], strict_slashes=False)
-def counter():
+def counter_api():
     """ Retrieves the number of wach objects by type """
     clasess = [Amenity, City, Place, Review, State, User]
     names = ["amenities", "cities", "places", "reviews", "states", "users"]
