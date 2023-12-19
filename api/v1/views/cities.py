@@ -72,16 +72,15 @@ def delete_city(city_id):
 def post_city(state_id):
     """POST API route, creates a new city"""
 
+    data = request.get_json()
+    if "name" not in data:
+        abort(400, description='Missing name')
+    
     if storage.get(State, state_id) is None:
         abort(404)
 
-    data = request.get_json()
-
     if data is None:
         abort(400, description='Not a JSON')
-
-    if "name" not in data:
-        abort(400, description='Missing name')
 
     data['state_id'] = state_id
     city = City(**data)
