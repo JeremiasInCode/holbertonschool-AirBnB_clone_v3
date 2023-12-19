@@ -11,13 +11,9 @@ from models import storage
 from flask import jsonify, abort, request
 
 
-@app_views.route("/states", methods=['GET'], strict_slashes=False)
-def all_states():
-    """ Retrieve the list of all objects """
-    return jsonify(storage.get(State).to_dict())
-
 
 @app_views.route('/states/<state_id>', methods=['GET'], strict_slashes=False)
+@app_views.route('/states')
 def specific_state(state_id):
     """ Retrieve a specific state """
     if storage.get(State, state_id) is None:
@@ -25,8 +21,7 @@ def specific_state(state_id):
     return jsonify(storage.get(State, state_id).to_dict())
 
 
-@app_views.route('/states/<state_id>', methods=['DELETE'],
-                 strict_slashes=False)
+@app_views.route('/states/<state_id>', methods=['DELETE'])
 def delete_state(state_id):
     """ Delete a specific state_id """
     state = storage.get(State, state_id)
@@ -39,13 +34,16 @@ def delete_state(state_id):
     return jsonify({}), 200
 
 
-@app_views.route('/states/', methods=['POST'], strict_slashes=False)
+@app_views.route('/states/', methods=['POST'])
 def add_state():
     """ Add a state """
     data = request.get_json()
 
     if data is None:
-        abort(400, description='Not a JSON')
+        abort(400, description='Not data')
+
+    if 'name' not in data:
+        abort(400, description='Missing name')
 
     state = State(**data)
     state.save()
@@ -58,7 +56,7 @@ def update_state(state_id):
     data = request.get_json()
 
     if data is None:
-        abort(400, description='Not a JSON')
+        abort(400, description='Not data')
 
     state = storage.get(State, state_id)
 
