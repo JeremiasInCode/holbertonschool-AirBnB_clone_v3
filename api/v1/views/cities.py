@@ -80,7 +80,8 @@ def post_city(state_id):
 
     Raises:
         404: If the specified state is not found.
-        400: If the request does not contain valid JSON data or if 'name' is missing.
+        400: If the request does not contain valid JSON data
+        or if 'name' is missing.
     """
     if storage.get(State, state_id) is None:
         abort(404)
@@ -88,10 +89,10 @@ def post_city(state_id):
     data = request.get_json()
 
     if data is None:
-        abort(400, description='No JSON data provided')
+        abort(400, description='Not a JSON')
 
     if "name" not in data:
-        abort(400, description='Missing required field: name')
+        abort(400, description='Missing name')
 
     data['state_id'] = state_id
     city = City(**data)
@@ -116,7 +117,7 @@ def put_city(city_id):
     data = request.get_json()
 
     if data is None:
-        abort(400, description='No JSON data provided')
+        abort(400, description='Not a JSON')
 
     city = storage.get(City, city_id)
 
