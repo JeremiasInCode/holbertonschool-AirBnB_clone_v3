@@ -1,19 +1,26 @@
 #!/usr/bin/python3
-""" states.py """
+""" states.py - Module for handling state-related API endpoints """
 from api.v1.views import app_views
-from models.amenity import Amenity
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.user import User
 from models import storage
+from models.state import State
 from flask import jsonify, abort, request
+
 
 @app_views.route('/states/<state_id>', methods=['GET'])
 @app_views.route('/states', defaults={'state_id': None}, methods=['GET'])
-def specific_state(state_id):
-    """ Retrieve a specific state """
+def get_states(state_id):
+    """Retrieve details of a specific state or a list of all states.
+
+    Args:
+        state_id (str): The ID of the state to retrieve details for.
+            If set to None, returns a list of all states.
+
+    Returns:
+        JSON: A JSON representation of the state details or a list of states.
+
+    Raises:
+        404: If the specified state is not found.
+    """
     if state_id is not None:
         state = storage.get(State, state_id)
         if state is None:
@@ -26,9 +33,18 @@ def specific_state(state_id):
 
 @app_views.route('/states/<state_id>', methods=['DELETE'])
 def delete_state(state_id):
-    """ Delete a specific state_id """
-    state = storage.get(State, state_id)
+    """Delete a specific state by ID.
 
+    Args:
+        state_id (str): The ID of the state to delete.
+
+    Returns:
+        JSON: An empty JSON response.
+
+    Raises:
+        404: If the specified state is not found.
+    """
+    state = storage.get(State, state_id)
     if state:
         storage.delete(state)
         storage.save()
@@ -38,15 +54,21 @@ def delete_state(state_id):
 
 
 @app_views.route('/states/', methods=['POST'])
-def add_state():
-    """ Add a state """
+def create_state():
+    """Create a new state.
+
+    Returns:
+        JSON: A JSON representation of the newly created state.
+
+    Raises:
+        400: If the request does not contain valid JSON data
+        or if 'name' is missing.
+    """
     data = request.get_json()
-
     if data is None:
-        abort(400, description='Not data')
-
+        abort(400, description='No JSON data provided')
     if 'name' not in data:
-        abort(400, description='Missing name')
+        abort(400, description='Missing required field: name')
 
     state = State(**data)
     state.save()
@@ -55,20 +77,29 @@ def add_state():
 
 @app_views.route('/states/<state_id>', methods=['PUT'])
 def update_state(state_id):
-    """Update a state by given id"""
-    data = request.get_json()
+    """Update a state by ID.
 
+    Args:
+        state_id (str): The ID of the state to update.
+
+    Returns:
+        JSON: A JSON representation of the updated state.
+
+    Raises:
+        400: If the request does not contain valid JSON data.
+        404: If the specified state is not found.
+    """
+    data = request.get_json()
     if data is None:
-        abort(400, description='Not data')
+        abort(400, description='No JSON data provided')
 
     state = storage.get(State, state_id)
-
     if state is None:
         abort(404)
 
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
-            # update attributes
             setattr(state, key, value)
+
     state.save()
     return jsonify(state.to_dict()), 200
