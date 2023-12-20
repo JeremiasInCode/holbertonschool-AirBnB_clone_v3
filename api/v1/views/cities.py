@@ -83,21 +83,19 @@ def post_city(state_id):
         400: If the request does not contain valid JSON data or if
         'name' is missing.
     """
-    if storage.get(State, state_id) is None:
+    if not request.get_json():
+        return jsonify({"error": "Not a JSON"}), 400
+
+    if "name" not in request.get_json():
+        return jsonify({"error": "Missing name"}), 400
+
+    state_to_check = storage.get(State, state_id)
+    if state_to_check is None:
         abort(404)
 
-    data = request.get_json()
-
-    if data is None:
-        abort(400, description='Not a JSON')
-
-    if "name" not in data:
-        abort(400, description='Missing name')
-
-    data['state_id'] = state_id
-    city = City(**data)
-    city.save()
-    return jsonify(city.to_dict()), 201
+    new_city = City(**request.get_json())
+    storage.save()
+    return jsonify(new_city.to_dict()), 201
 
 
 @app_views.route("/cities/<city_id>", methods=["PUT"])
