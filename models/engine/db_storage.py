@@ -79,11 +79,6 @@ class DBStorage:
         """
             Returns the object based on the class name and its ID
         """
-            
-    def get(self, cls, id):
-        """
-            Returns the object based on the class name and its ID
-        """
         return self.__session.query(cls).get(id)
 
     def count(self, cls=None):
